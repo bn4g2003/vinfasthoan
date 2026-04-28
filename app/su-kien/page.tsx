@@ -94,6 +94,7 @@ export default function EventsPage() {
               <Link href="/su-kien" className="text-[#c8102e] hover:text-[#c8102e] transition-colors py-2">Sự kiện</Link>
               <Link href="/dang-ky-lai-thu" className="hover:text-[#c8102e] transition-colors py-2">Đăng ký lái thử</Link>
               <Link href="/su-kien" className="hover:text-[#c8102e] transition-colors py-2">Ưu đãi</Link>
+              <Link href="/brochure" className="hover:text-[#c8102e] transition-colors py-2">Brochure</Link>
             </nav>
           </div>
         </div>
@@ -254,7 +255,12 @@ export default function EventsPage() {
               HỖ TRỢ MUA HÀNG
             </h3>
             <ul className="space-y-3 text-[15px]">
-              {['Tải Brochure', 'Yêu Cầu Tư Vấn', 'Tải Bảng Giá Phụ Tùng'].map((item) => (
+              <li className="border-b border-gray-700 pb-2">
+                <Link href="/brochure" className="flex items-center gap-2 hover:text-[#c8102e] transition-colors">
+                  <ChevronRight size={14} className="text-gray-500" /> Tải Brochure
+                </Link>
+              </li>
+              {['Yêu Cầu Tư Vấn', 'Tải Bảng Giá Phụ Tùng'].map((item) => (
                 <li key={item} className="flex items-center gap-2 hover:text-[#c8102e] cursor-pointer transition-colors border-b border-gray-700 pb-2">
                   <ChevronRight size={14} className="text-gray-500" /> {item}
                 </li>

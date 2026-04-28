@@ -105,6 +105,7 @@ export default function Home() {
               <Link href="/su-kien" className="hover:text-[#c8102e] transition-colors py-2">Sự kiện</Link>
               <Link href="/dang-ky-lai-thu" className="hover:text-[#c8102e] transition-colors py-2">Đăng ký lái thử</Link>
               <Link href="/su-kien" className="hover:text-[#c8102e] transition-colors py-2">Ưu đãi</Link>
+              <Link href="/brochure" className="hover:text-[#c8102e] transition-colors py-2">Brochure</Link>
             </nav>
           </div>
         </div>
@@ -310,13 +311,18 @@ export default function Home() {
             <h3 className="text-white font-bold text-[18px] uppercase tracking-wide">HỖ TRỢ KHÁCH HÀNG</h3>
             <div className="w-12 h-1 bg-[#E11D48]"></div>
             <ul className="space-y-3 text-[15px] mb-6">
-              {['Bảng giá lắp đặt', 'Chính sách bảo hành', 'Câu hỏi thường gặp', 'Tải Brochure'].map((item) => (
+              {['Bảng giá lắp đặt', 'Chính sách bảo hành', 'Câu hỏi thường gặp'].map((item) => (
                 <li key={item}>
                   <Link href="#" className="flex items-center gap-2 hover:text-[#E11D48] transition-colors group">
                     <ChevronRight size={14} className="text-slate-500 group-hover:text-[#E11D48] transition-colors" /> {item}
                   </Link>
                 </li>
               ))}
+              <li>
+                <Link href="/brochure" className="flex items-center gap-2 hover:text-[#E11D48] transition-colors group">
+                  <ChevronRight size={14} className="text-slate-500 group-hover:text-[#E11D48] transition-colors" /> Tải Brochure
+                </Link>
+              </li>
             </ul>
             <Link href="/dang-ky-lai-thu" className="inline-flex items-center justify-center w-full bg-[#E11D48] hover:bg-rose-700 text-white py-3.5 rounded-lg text-[15px] font-bold transition-all shadow-md uppercase tracking-wide">
               Đăng ký lái thử
