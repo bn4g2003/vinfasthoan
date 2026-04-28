@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Phone, Mail, MapPin, ChevronRight, Menu, ChevronLeft, Calendar, ArrowRight, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function Home() {
   const banners = [
@@ -15,8 +16,81 @@ export default function Home() {
 
   const [currentBanner, setCurrentBanner] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [currentCars, setCurrentCars] = useState<any[]>([]);
+  const [serviceCars, setServiceCars] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchCars = async () => {
+    try {
+      const { data: carsData, error } = await supabase
+        .from('cars')
+        .select(`
+          *,
+          car_categories (
+            name,
+            slug
+          )
+        `);
+
+      if (error) throw error;
+
+      if (carsData && carsData.length > 0) {
+        // Có dữ liệu từ DB
+        const hienDai = carsData.filter(c => c.car_categories?.slug === 'xe-hien-dai');
+        const dichVu = carsData.filter(c => c.car_categories?.slug === 'xe-dich-vu');
+
+        setCurrentCars(hienDai.map(c => ({
+          name: c.name,
+          price: c.price,
+          img: c.main_image,
+          desc: c.short_description,
+          isContact: c.is_contact,
+          slug: c.slug
+        })));
+
+        setServiceCars(dichVu.map(c => ({
+          name: c.name,
+          price: c.price,
+          img: c.main_image,
+          desc: c.short_description,
+          isContact: c.is_contact,
+          slug: c.slug
+        })));
+      } else {
+        // Fallback tĩnh nếu chưa có DB
+        loadStaticData();
+      }
+    } catch (error) {
+      console.error("Lỗi khi fetch data từ Supabase:", error);
+      loadStaticData(); // Fallback nếu có lỗi
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadStaticData = () => {
+    setCurrentCars([
+      { name: "VF 3", price: "235.000.000 VNĐ", img: "/car/imgi_9_1.png", desc: "Mẫu SUV điện cỡ nhỏ đầu tiên, thiết kế cá tính, nhỏ gọn và tiện dụng cho đô thị.", slug: "vf-3" },
+      { name: "VF 5", price: "468.000.000 VNĐ", img: "/car/imgi_10_3-2.png", desc: "Trải nghiệm lái phấn khích cùng thiết kế thời thượng hướng tới tương lai.", slug: "vf-5" },
+      { name: "VF 6", price: "675.000.000 VNĐ", img: "/car/imgi_11_4.png", desc: "Kiệt tác nghệ thuật với thiết kế hiện đại, tinh tế cùng công nghệ tiên tiến.", slug: "vf-6" },
+      { name: "VF 7", price: "850.000.000 VNĐ", img: "/car/imgi_12_5.png", desc: "Đỉnh cao thiết kế mang cảm hứng vũ trụ phi đối xứng, uy dũng và sang trọng.", slug: "vf-7" },
+      { name: "VF 8", price: "1.079.000.000 VNĐ", img: "/car/imgi_13_6.png", desc: "SUV cỡ trung mạnh mẽ, thông minh, mang lại trải nghiệm đẳng cấp toàn cầu.", slug: "vf-8" },
+      { name: "VF 9", price: "1.499.000.000 VNĐ", img: "/car/imgi_14_7.png", desc: "Tuyệt tác SUV Full-size cao cấp nhất, khẳng định vị thế và quyền uy người dùng.", slug: "vf-9" },
+    ]);
+
+    setServiceCars([
+      { name: "VinFast Minio Green", price: "250.000.000 VNĐ", img: "/car/imgi_15_Minio-green-mau-bac-540x282.png", desc: "Dòng xe dịch vụ xanh, tiết kiệm năng lượng tối đa.", slug: "vinfast-minio-green" },
+      { name: "VinFast Herio Green", price: "499.000.000 VNĐ", img: "/car/imgi_16_Herio-Green-mau-vang-540x282.png", desc: "Giải pháp vận tải thông minh cho môi trường đô thị hiện đại.", slug: "vinfast-herio-green" },
+      { name: "VinFast Nerio Green", price: "508.000.000 VNĐ", img: "/car/imgi_17_Nerio-Green-mau-do-540x282-1.png", desc: "Không gian rộng rãi, vận hành êm ái, thân thiện với môi trường.", slug: "vinfast-nerio-green" },
+      { name: "VinFast Limo Green", price: "749.000.000 VNĐ", img: "/car/imgi_18_Limo-Green-mau-vang-540x282.png", desc: "Dịch vụ vận tải cao cấp chuẩn Limousine không phát thải.", slug: "vinfast-limo-green" },
+      { name: "VinFast EC Van", price: "289.000.000 VNĐ", img: "/car/imgi_19_3-9-e1749183878376-2.jpg", desc: "Tối ưu hóa không gian chở hàng, giải pháp logistics xanh.", slug: "vinfast-ec-van" },
+      { name: "VinFast Wild", price: "Liên Hệ", img: "/news/imgi_20_vf-wild-ban-tai.png", desc: "Sức mạnh vượt trội, chinh phục mọi địa hình với công nghệ thuần điện.", isContact: true, slug: "vinfast-wild" },
+    ]);
+  };
 
   useEffect(() => {
+    fetchCars();
+    
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
@@ -33,24 +107,6 @@ export default function Home() {
 
   const nextBanner = () => setCurrentBanner((prev) => (prev + 1) % banners.length);
   const prevBanner = () => setCurrentBanner((prev) => (prev - 1 + banners.length) % banners.length);
-
-  const currentCars = [
-    { name: "VF 3", price: "235.000.000 VNĐ", img: "/car/imgi_9_1.png", desc: "Mẫu SUV điện cỡ nhỏ đầu tiên, thiết kế cá tính, nhỏ gọn và tiện dụng cho đô thị." },
-    { name: "VF 5", price: "468.000.000 VNĐ", img: "/car/imgi_10_3-2.png", desc: "Trải nghiệm lái phấn khích cùng thiết kế thời thượng hướng tới tương lai." },
-    { name: "VF 6", price: "675.000.000 VNĐ", img: "/car/imgi_11_4.png", desc: "Kiệt tác nghệ thuật với thiết kế hiện đại, tinh tế cùng công nghệ tiên tiến." },
-    { name: "VF 7", price: "850.000.000 VNĐ", img: "/car/imgi_12_5.png", desc: "Đỉnh cao thiết kế mang cảm hứng vũ trụ phi đối xứng, uy dũng và sang trọng." },
-    { name: "VF 8", price: "1.079.000.000 VNĐ", img: "/car/imgi_13_6.png", desc: "SUV cỡ trung mạnh mẽ, thông minh, mang lại trải nghiệm đẳng cấp toàn cầu." },
-    { name: "VF 9", price: "1.499.000.000 VNĐ", img: "/car/imgi_14_7.png", desc: "Tuyệt tác SUV Full-size cao cấp nhất, khẳng định vị thế và quyền uy người dùng." },
-  ];
-
-  const serviceCars = [
-    { name: "VinFast Minio Green", price: "250.000.000 VNĐ", img: "/car/imgi_15_Minio-green-mau-bac-540x282.png", desc: "Dòng xe dịch vụ xanh, tiết kiệm năng lượng tối đa." },
-    { name: "VinFast Herio Green", price: "499.000.000 VNĐ", img: "/car/imgi_16_Herio-Green-mau-vang-540x282.png", desc: "Giải pháp vận tải thông minh cho môi trường đô thị hiện đại." },
-    { name: "VinFast Nerio Green", price: "508.000.000 VNĐ", img: "/car/imgi_17_Nerio-Green-mau-do-540x282-1.png", desc: "Không gian rộng rãi, vận hành êm ái, thân thiện với môi trường." },
-    { name: "VinFast Limo Green", price: "749.000.000 VNĐ", img: "/car/imgi_18_Limo-Green-mau-vang-540x282.png", desc: "Dịch vụ vận tải cao cấp chuẩn Limousine không phát thải." },
-    { name: "VinFast EC Van", price: "289.000.000 VNĐ", img: "/car/imgi_19_3-9-e1749183878376-2.jpg", desc: "Tối ưu hóa không gian chở hàng, giải pháp logistics xanh." },
-    { name: "VinFast Wild", price: "Liên Hệ", img: "/news/imgi_20_vf-wild-ban-tai.png", desc: "Sức mạnh vượt trội, chinh phục mọi địa hình với công nghệ thuần điện.", isContact: true },
-  ];
 
   const news = [
     { img: "/news/imgi_21_1.jpg", title: "VINFAST CHÍNH THỨC NHẬN ĐẶT CỌC DÒNG XE VF 5 PLUS TẠI THỊ TRƯỜNG VIỆT NAM" },
@@ -96,8 +152,11 @@ export default function Home() {
               <div className="group relative py-2 cursor-pointer">
                 <span className="hover:text-[#c8102e] transition-colors flex items-center gap-1">Sản phẩm</span>
                 <div className="absolute top-full left-0 bg-[#e08e0b] min-w-[220px] shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 flex flex-col">
-                  {['VinFast VF 3', 'VinFast VF 5', 'VinFast VF 6', 'VinFast VF 7', 'VinFast VF 8', 'VinFast VF 9', 'VinFast Minio Green', 'VinFast Herio Green', 'VinFast Nerio Green', 'VinFast Limo Green', 'VinFast EC Van', 'VinFast Wild'].map(car => (
-                    <Link key={car} href="/chi-tiet-xe" className="text-white hover:bg-white/20 px-4 py-3 border-b border-white/10 text-[14px] font-normal">{car}</Link>
+                  {currentCars.map(car => (
+                    <Link key={car.slug || car.name} href={`/chi-tiet-xe/${car.slug || ''}`} className="text-white hover:bg-white/20 px-4 py-3 border-b border-white/10 text-[14px] font-normal">{car.name}</Link>
+                  ))}
+                  {serviceCars.map(car => (
+                    <Link key={car.slug || car.name} href={`/chi-tiet-xe/${car.slug || ''}`} className="text-white hover:bg-white/20 px-4 py-3 border-b border-white/10 text-[14px] font-normal">{car.name}</Link>
                   ))}
                 </div>
               </div>
@@ -164,28 +223,32 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {currentCars.map((car, index) => (
-              <div key={index} className="bg-white rounded-[16px] shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group border border-gray-100">
-                <Link href="/chi-tiet-xe" className="w-full h-72 bg-white flex items-center justify-center p-2 relative overflow-hidden group-hover:bg-gray-50 transition-colors cursor-pointer">
-                  <img src={car.img} alt={car.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500 drop-shadow-md" />
-                </Link>
-                <div className="p-8 flex flex-col flex-1 border-t border-gray-50">
-                  <h3 className="text-[22px] font-bold text-[#0F172A] mb-3 uppercase tracking-wide">{car.name}</h3>
-                  <p className="text-[#334155] text-[15px] mb-6 line-clamp-2 leading-relaxed">{car.desc}</p>
-                  <div className="mt-auto">
-                    <p className="text-[#334155] text-[14px] mb-1 font-medium uppercase tracking-wider text-gray-500">Giá bán từ</p>
-                    <p className="text-[20px] font-bold text-[#E11D48] mb-8">{car.price}</p>
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      <Link href="/chi-tiet-xe" className="w-full text-center bg-[#E11D48] hover:bg-rose-700 text-white py-3 rounded-lg text-[15px] font-bold transition-all shadow-md hover:shadow-lg">
-                        Xem chi tiết
-                      </Link>
+          {isLoading ? (
+            <div className="flex justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#E11D48]"></div></div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {currentCars.map((car, index) => (
+                <div key={index} className="bg-white rounded-[16px] shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group border border-gray-100">
+                  <Link href={`/chi-tiet-xe/${car.slug || ''}`} className="w-full h-72 bg-white flex items-center justify-center p-2 relative overflow-hidden group-hover:bg-gray-50 transition-colors cursor-pointer">
+                    <img src={car.img} alt={car.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500 drop-shadow-md" />
+                  </Link>
+                  <div className="p-8 flex flex-col flex-1 border-t border-gray-50">
+                    <h3 className="text-[22px] font-bold text-[#0F172A] mb-3 uppercase tracking-wide">{car.name}</h3>
+                    <p className="text-[#334155] text-[15px] mb-6 line-clamp-2 leading-relaxed">{car.desc}</p>
+                    <div className="mt-auto">
+                      <p className="text-[#334155] text-[14px] mb-1 font-medium uppercase tracking-wider text-gray-500">Giá bán từ</p>
+                      <p className="text-[20px] font-bold text-[#E11D48] mb-8">{car.price}</p>
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <Link href={`/chi-tiet-xe/${car.slug || ''}`} className="w-full text-center bg-[#E11D48] hover:bg-rose-700 text-white py-3 rounded-lg text-[15px] font-bold transition-all shadow-md hover:shadow-lg">
+                          Xem chi tiết
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -202,28 +265,32 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {serviceCars.map((car, index) => (
-              <div key={index} className="bg-white rounded-[16px] shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group border border-gray-200">
-                <div className="w-full h-72 bg-gray-50 flex items-center justify-center p-2 relative overflow-hidden">
-                  <img src={car.img} alt={car.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500 drop-shadow-sm" />
-                </div>
-                <div className="p-8 flex flex-col flex-1">
-                  <h3 className="text-[20px] font-bold text-[#0F172A] mb-3 uppercase tracking-wide">{car.name}</h3>
-                  <p className="text-[#334155] text-[15px] mb-6 line-clamp-2 leading-relaxed">{car.desc}</p>
-                  <div className="mt-auto">
-                    <p className="text-[#334155] text-[14px] mb-1 font-medium uppercase tracking-wider text-gray-500">Giá bán từ</p>
-                    <p className="text-[20px] font-bold text-[#E11D48] mb-8">{car.price}</p>
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      <Link href="/chi-tiet-xe" className="w-full text-center bg-[#0F172A] hover:bg-slate-800 text-white py-3 rounded-lg text-[15px] font-bold transition-all shadow-md">
-                        Xem chi tiết
-                      </Link>
+          {isLoading ? (
+            <div className="flex justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#E11D48]"></div></div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {serviceCars.map((car, index) => (
+                <div key={index} className="bg-white rounded-[16px] shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group border border-gray-200">
+                  <Link href={`/chi-tiet-xe/${car.slug || ''}`} className="w-full h-72 bg-gray-50 flex items-center justify-center p-2 relative overflow-hidden">
+                    <img src={car.img} alt={car.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500 drop-shadow-sm" />
+                  </Link>
+                  <div className="p-8 flex flex-col flex-1">
+                    <h3 className="text-[20px] font-bold text-[#0F172A] mb-3 uppercase tracking-wide">{car.name}</h3>
+                    <p className="text-[#334155] text-[15px] mb-6 line-clamp-2 leading-relaxed">{car.desc}</p>
+                    <div className="mt-auto">
+                      <p className="text-[#334155] text-[14px] mb-1 font-medium uppercase tracking-wider text-gray-500">Giá bán từ</p>
+                      <p className="text-[20px] font-bold text-[#E11D48] mb-8">{car.price}</p>
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <Link href={`/chi-tiet-xe/${car.slug || ''}`} className="w-full text-center bg-[#0F172A] hover:bg-slate-800 text-white py-3 rounded-lg text-[15px] font-bold transition-all shadow-md">
+                          Xem chi tiết
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -296,10 +363,10 @@ export default function Home() {
             <h3 className="text-white font-bold text-[18px] uppercase tracking-wide">SẢN PHẨM MỚI</h3>
             <div className="w-12 h-1 bg-[#E11D48]"></div>
             <ul className="space-y-3 text-[15px]">
-              {['VinFast VF 3', 'VinFast VF 5', 'VinFast VF 6', 'VinFast VF 7', 'VinFast VF 8', 'VinFast VF 9'].map((car) => (
-                <li key={car}>
-                  <Link href="/chi-tiet-xe" className="flex items-center gap-2 hover:text-[#E11D48] transition-colors group">
-                    <ChevronRight size={14} className="text-slate-500 group-hover:text-[#E11D48] transition-colors" /> {car}
+              {currentCars.map((car) => (
+                <li key={car.slug || car.name}>
+                  <Link href={`/chi-tiet-xe/${car.slug || ''}`} className="flex items-center gap-2 hover:text-[#E11D48] transition-colors group">
+                    <ChevronRight size={14} className="text-slate-500 group-hover:text-[#E11D48] transition-colors" /> {car.name}
                   </Link>
                 </li>
               ))}
