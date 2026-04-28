@@ -23,6 +23,15 @@ export default function CarDetail() {
   const [specs, setSpecs] = useState<any[]>([]);
   const [allCars, setAllCars] = useState<any[]>([]); // Cho menu "XE NỔI BẬT"
 
+  // Lead Modal states
+  const [leadForm, setLeadForm] = useState({
+    name: "",
+    phone: "",
+    email: "",
+    notes: ""
+  });
+  const [isSubmittingLead, setIsSubmittingLead] = useState(false);
+
   useEffect(() => {
     const fetchCarDetail = async () => {
       try {
@@ -357,25 +366,82 @@ export default function CarDetail() {
             </button>
             <h3 className="text-2xl font-bold uppercase mb-2 text-center text-black">Nhận thông tin</h3>
             <div className="w-12 h-1 bg-[#c8102e] mx-auto mb-6"></div>
-            <form className="space-y-4 text-left">
+            <form 
+              className="space-y-4 text-left"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (!leadForm.name || !leadForm.phone) {
+                  alert("Vui lòng nhập họ tên và số điện thoại.");
+                  return;
+                }
+                setIsSubmittingLead(true);
+                try {
+                  const { error } = await supabase.from('lead_registrations').insert([{
+                    full_name: leadForm.name,
+                    phone: leadForm.phone,
+                    email: leadForm.email,
+                    notes: leadForm.notes || carData?.name,
+                    car_model: carData?.name,
+                    type: 'Nhận thông tin',
+                    status: 'Mới'
+                  }]);
+                  if (error) throw error;
+                  alert("Gửi thông tin thành công! Chúng tôi sẽ sớm liên hệ lại.");
+                  setShowModal(false);
+                  setLeadForm({ name: "", phone: "", email: "", notes: "" });
+                } catch (err) {
+                  console.error(err);
+                  alert("Có lỗi xảy ra, vui lòng thử lại sau.");
+                } finally {
+                  setIsSubmittingLead(false);
+                }
+              }}
+            >
               <div>
                 <label className="block text-[15px] font-bold text-gray-800 mb-1">Họ và tên *</label>
-                <input type="text" className="w-full border border-gray-300 p-2.5 text-[15px] focus:border-[#c8102e] focus:outline-none" placeholder="Nhập họ và tên của bạn" />
+                <input 
+                  type="text" required 
+                  value={leadForm.name}
+                  onChange={e => setLeadForm({...leadForm, name: e.target.value})}
+                  className="w-full border border-gray-400 p-2.5 text-[15px] text-black font-medium focus:border-[#c8102e] focus:outline-none placeholder:text-gray-500" 
+                  placeholder="Nhập họ và tên của bạn" 
+                />
               </div>
               <div>
-                <label className="block text-[15px] font-bold text-gray-800 mb-1">Số điện thoại *</label>
-                <input type="text" className="w-full border border-gray-300 p-2.5 text-[15px] focus:border-[#c8102e] focus:outline-none" placeholder="Nhập số điện thoại" />
+                <label className="block text-[15px] font-bold text-black mb-1">Số điện thoại *</label>
+                <input 
+                  type="text" required 
+                  value={leadForm.phone}
+                  onChange={e => setLeadForm({...leadForm, phone: e.target.value})}
+                  className="w-full border border-gray-400 p-2.5 text-[15px] text-black font-medium focus:border-[#c8102e] focus:outline-none placeholder:text-gray-500" 
+                  placeholder="Nhập số điện thoại" 
+                />
               </div>
               <div>
-                <label className="block text-[15px] font-bold text-gray-800 mb-1">Email</label>
-                <input type="email" className="w-full border border-gray-300 p-2.5 text-[15px] focus:border-[#c8102e] focus:outline-none" placeholder="Nhập email" />
+                <label className="block text-[15px] font-bold text-black mb-1">Email</label>
+                <input 
+                  type="email" 
+                  value={leadForm.email}
+                  onChange={e => setLeadForm({...leadForm, email: e.target.value})}
+                  className="w-full border border-gray-400 p-2.5 text-[15px] text-black font-medium focus:border-[#c8102e] focus:outline-none placeholder:text-gray-500" 
+                  placeholder="Nhập email" 
+                />
               </div>
               <div>
-                <label className="block text-[15px] font-bold text-gray-800 mb-1">Nội dung tư vấn</label>
-                <textarea className="w-full border border-gray-300 p-2.5 text-[15px] h-24 focus:border-[#c8102e] focus:outline-none" placeholder="Dòng xe bạn đang quan tâm..." defaultValue={carData?.name}></textarea>
+                <label className="block text-[15px] font-bold text-black mb-1">Nội dung tư vấn</label>
+                <textarea 
+                  value={leadForm.notes}
+                  onChange={e => setLeadForm({...leadForm, notes: e.target.value})}
+                  className="w-full border border-gray-400 p-2.5 text-[15px] text-black font-medium h-24 focus:border-[#c8102e] focus:outline-none placeholder:text-gray-500" 
+                  placeholder="Dòng xe bạn đang quan tâm..." 
+                ></textarea>
               </div>
-              <button type="button" onClick={() => {alert("Gửi thông tin thành công! Chúng tôi sẽ sớm liên hệ lại."); setShowModal(false)}} className="w-full bg-[#c8102e] text-white py-3 font-bold uppercase text-[15px] mt-2 hover:bg-red-800 transition">
-                Gửi thông tin
+              <button 
+                type="submit" 
+                disabled={isSubmittingLead}
+                className="w-full bg-[#c8102e] text-white py-3 font-bold uppercase text-[15px] mt-2 hover:bg-red-800 transition disabled:opacity-50"
+              >
+                {isSubmittingLead ? "Đang gửi..." : "Gửi thông tin"}
               </button>
             </form>
           </div>

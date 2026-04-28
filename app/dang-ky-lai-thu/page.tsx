@@ -4,10 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { Phone, Mail, MapPin, ChevronRight, Menu, Send, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function TestDriveRegistrationPage() {
   const [formData, setFormData] = useState({
-    carType: "VinFast Wild",
+    carType: "VF 3",
     fullName: "",
     address: "",
     phone: "",
@@ -15,6 +16,7 @@ export default function TestDriveRegistrationPage() {
     notes: ""
   });
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -24,9 +26,45 @@ export default function TestDriveRegistrationPage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert("Đăng ký thành công! Cảm ơn bạn.");
+    if (!formData.fullName || !formData.phone) {
+      alert("Vui lòng nhập đầy đủ họ tên và số điện thoại.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase.from('lead_registrations').insert([
+        {
+          full_name: formData.fullName,
+          phone: formData.phone,
+          address: formData.address,
+          car_model: formData.carType,
+          type: 'Lái thử',
+          has_license: formData.hasLicense,
+          notes: formData.notes,
+          status: 'Mới'
+        }
+      ]);
+
+      if (error) throw error;
+
+      alert("Đăng ký lái thử thành công! Chúng tôi sẽ sớm liên hệ với bạn.");
+      setFormData({
+        carType: "VF 3",
+        fullName: "",
+        address: "",
+        phone: "",
+        hasLicense: "Không",
+        notes: ""
+      });
+    } catch (err) {
+      console.error("Lỗi đăng ký:", err);
+      alert("Có lỗi xảy ra, vui lòng thử lại sau.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -93,11 +131,10 @@ export default function TestDriveRegistrationPage() {
                <label className="sm:w-48 font-bold text-black text-[15px]">Loại xe</label>
                <div className="flex-1 flex items-center gap-2">
                  <select 
-                   className="flex-1 border border-gray-300 p-2.5 text-[15px] focus:outline-none focus:border-[#c8102e] appearance-none bg-white"
+                   className="flex-1 border border-gray-400 p-2.5 text-[15px] text-black font-medium focus:outline-none focus:border-[#c8102e] appearance-none bg-white"
                    value={formData.carType}
                    onChange={(e) => setFormData({...formData, carType: e.target.value})}
                  >
-                    <option value="VinFast Wild">VinFast Wild</option>
                     <option value="VF 3">VF 3</option>
                     <option value="VF 5">VF 5</option>
                     <option value="VF 6">VF 6</option>
@@ -116,7 +153,7 @@ export default function TestDriveRegistrationPage() {
                  <input 
                    type="text" 
                    placeholder="Họ và tên đầy đủ"
-                   className="flex-1 border border-gray-300 p-2.5 text-[15px] focus:outline-none focus:border-[#c8102e]"
+                   className="flex-1 border border-gray-400 p-2.5 text-[15px] text-black font-medium focus:outline-none focus:border-[#c8102e] placeholder:text-gray-500"
                    value={formData.fullName}
                    onChange={(e) => setFormData({...formData, fullName: e.target.value})}
                  />
@@ -131,7 +168,7 @@ export default function TestDriveRegistrationPage() {
                  <input 
                    type="text" 
                    placeholder="Địa chỉ"
-                   className="flex-1 border border-gray-300 p-2.5 text-[15px] focus:outline-none focus:border-[#c8102e]"
+                   className="flex-1 border border-gray-400 p-2.5 text-[15px] text-black font-medium focus:outline-none focus:border-[#c8102e] placeholder:text-gray-500"
                    value={formData.address}
                    onChange={(e) => setFormData({...formData, address: e.target.value})}
                  />
@@ -147,7 +184,7 @@ export default function TestDriveRegistrationPage() {
                    type="tel" 
                    placeholder="Ví dụ: 0912588888"
                    required
-                   className="flex-1 border border-gray-300 p-2.5 text-[15px] focus:outline-none focus:border-[#c8102e]"
+                   className="flex-1 border border-gray-400 p-2.5 text-[15px] text-black font-medium focus:outline-none focus:border-[#c8102e] placeholder:text-gray-500"
                    value={formData.phone}
                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
                  />
@@ -189,7 +226,8 @@ export default function TestDriveRegistrationPage() {
                <label className="sm:w-48 font-bold text-black text-[15px] sm:mt-2">Ghi chú</label>
                <div className="flex-1 flex items-start gap-2">
                  <textarea 
-                   className="flex-1 border border-gray-300 p-2.5 text-[15px] min-h-[120px] focus:outline-none focus:border-[#c8102e]"
+                   className="flex-1 border border-gray-400 p-2.5 text-[15px] text-black font-medium min-h-[120px] focus:outline-none focus:border-[#c8102e] placeholder:text-gray-500"
+                   placeholder="Ghi chú thêm (nếu có)"
                    value={formData.notes}
                    onChange={(e) => setFormData({...formData, notes: e.target.value})}
                  ></textarea>
@@ -204,9 +242,9 @@ export default function TestDriveRegistrationPage() {
                   <p className="text-[#c8102e] italic font-bold text-[14px] mb-4">
                     Xin vui lòng điền đầy đủ thông tin được đánh dấu hoa thị (*).
                   </p>
-                  <button type="submit" className="flex items-stretch overflow-hidden group">
+                  <button type="submit" disabled={isSubmitting} className="flex items-stretch overflow-hidden group disabled:opacity-50">
                      <span className="bg-black text-white font-bold text-[13px] uppercase px-5 py-2.5 group-hover:bg-gray-800 transition-colors">
-                        Gửi đăng ký
+                        {isSubmitting ? "Đang gửi..." : "Gửi đăng ký"}
                      </span>
                      <span className="bg-[#c8102e] text-white px-3 flex items-center justify-center group-hover:bg-red-800 transition-colors">
                         <Send size={14} className="-ml-1" />

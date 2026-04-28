@@ -6,9 +6,8 @@ import Link from "next/link";
 import { Phone, Mail, MapPin, ChevronRight, Menu, Calendar, User, ChevronDown, MessageCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
-export default function EventsPage() {
+export default function PromotionsPage() {
   const [isScrolled, setIsScrolled] = useState(false);
-
   const [posts, setPosts] = useState<any[]>([]);
   const [latestPosts, setLatestPosts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -17,16 +16,16 @@ export default function EventsPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch posts for 'su-kien'
+        // Fetch posts for 'uu-dai'
         const { data: postsData } = await supabase
           .from('posts')
           .select('*, post_categories!inner(slug)')
-          .eq('post_categories.slug', 'su-kien')
+          .eq('post_categories.slug', 'uu-dai')
           .order('created_at', { ascending: false });
         
         if (postsData) setPosts(postsData);
 
-        // Fetch 4 bài viết mới nhất cho phần dưới
+        // Fetch 4 bài viết mới nhất
         const { data: latest } = await supabase
           .from('posts')
           .select('title, slug, cover_image, created_at')
@@ -39,7 +38,7 @@ export default function EventsPage() {
         if (cars) setSidebarCars(cars);
 
       } catch (error) {
-        console.error("Error fetching events:", error);
+        console.error("Error fetching promotions:", error);
       } finally {
         setIsLoading(false);
       }
@@ -88,30 +87,28 @@ export default function EventsPage() {
             </div>
             <nav className="hidden md:flex items-center gap-8 text-[14px] font-bold text-black uppercase tracking-wider">
               <Link href="/" className="hover:text-[#c8102e] transition-colors py-2">Trang chủ</Link>
-              <Link href="/su-kien" className="text-[#c8102e] hover:text-[#c8102e] transition-colors py-2">Sự kiện</Link>
+              <Link href="/su-kien" className="hover:text-[#c8102e] transition-colors py-2">Sự kiện</Link>
               <Link href="/dang-ky-lai-thu" className="hover:text-[#c8102e] transition-colors py-2">Đăng ký lái thử</Link>
-              <Link href="/uu-dai" className="hover:text-[#c8102e] transition-colors py-2">Ưu đãi</Link>
+              <Link href="/uu-dai" className="text-[#c8102e] hover:text-[#c8102e] transition-colors py-2">Ưu đãi</Link>
               <Link href="/brochure" className="hover:text-[#c8102e] transition-colors py-2">Brochure</Link>
             </nav>
           </div>
         </div>
       </header>
 
-      {/* Banner Breadcrumb */}
+      {/* Banner */}
       <div className="relative w-full h-[200px] sm:h-[300px] overflow-hidden bg-black flex flex-col justify-center items-center md:items-start text-white">
         <img src="/baner/imgi_6_1.jpg" alt="Banner" className="absolute top-0 left-0 w-full h-full object-cover opacity-50" />
         <div className="relative z-10 max-w-[1200px] w-full mx-auto px-4 flex flex-col md:flex-row justify-between items-center mt-12 md:mt-24">
-           <h1 className="text-3xl md:text-4xl font-bold uppercase tracking-wider mb-2 md:mb-0">TIN TỨC</h1>
+           <h1 className="text-3xl md:text-4xl font-bold uppercase tracking-wider mb-2 md:mb-0">ƯU ĐÃI</h1>
            <div className="text-sm tracking-widest uppercase">
-             <Link href="/" className="hover:text-red-400">Trang chủ</Link> <span className="mx-2">»</span> SỰ KIỆN
+             <Link href="/" className="hover:text-red-400">Trang chủ</Link> <span className="mx-2">»</span> ƯU ĐÃI
            </div>
         </div>
       </div>
 
-      {/* Content */}
       <main className="max-w-[1200px] mx-auto px-4 py-16">
         <div className="flex flex-col lg:flex-row gap-12">
-          
           {/* Main Column - Expanded to 3/4 */}
           <div className="w-full lg:w-3/4">
              <div className="space-y-10">
@@ -137,8 +134,7 @@ export default function EventsPage() {
                   </div>
                 ))}
              </div>
-             
-             {posts.length === 0 && <p className="text-center py-10 text-gray-500 font-bold">Chưa có sự kiện nào.</p>}
+             {posts.length === 0 && <p className="text-center py-10 text-gray-500 font-bold">Chưa có chương trình ưu đãi nào.</p>}
           </div>
 
           {/* Sidebar - Narrowed to 1/4 */}
@@ -170,7 +166,7 @@ export default function EventsPage() {
 
                {/* Xe Nổi Bật */}
                <div>
-                 <h3 className="text-xl font-black text-black uppercase mb-4 border-b-2 border-gray-300 pb-2 relative">
+                 <h3 className="text-xl font-black text-black uppercase mb-4 border-b-2 border-gray-200 pb-2 relative">
                    XE NỔI BẬT
                    <span className="absolute bottom-[-2px] left-0 w-16 h-[2px] bg-[#c8102e]"></span>
                  </h3>
@@ -194,7 +190,6 @@ export default function EventsPage() {
                </div>
              </div>
           </div>
-
         </div>
 
         {/* Bài viết mới nhất section */}
@@ -221,11 +216,10 @@ export default function EventsPage() {
         </div>
       </main>
 
-      {/* Footer */}
       <footer className="bg-[#1a1a1a] text-gray-300 py-16 border-t-[5px] border-[#c8102e]">
-        <div className="max-w-[1200px] mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-12">
-           <p className="text-center w-full col-span-full">&copy; 2024 VinFast Hoàn. All rights reserved.</p>
-        </div>
+         <div className="max-w-[1200px] mx-auto px-4 text-center">
+            <p>&copy; 2024 VinFast Hoàn. All rights reserved.</p>
+         </div>
       </footer>
     </div>
   );
