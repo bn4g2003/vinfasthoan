@@ -242,7 +242,7 @@ export default function CarDetail() {
         {detailBlocks.length > 0 && (
           <div className="mt-24">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold uppercase mb-3">CHI TIẾT XE</h2>
+              <h2 className="text-3xl font-black text-black uppercase mb-3">CHI TIẾT XE</h2>
               <div className="w-16 h-[2px] bg-[#c8102e] mx-auto"></div>
             </div>
             <div className="space-y-8 flex flex-col items-center">
@@ -261,7 +261,7 @@ export default function CarDetail() {
         {specs.length > 0 && (
           <div className="mt-24 mb-10">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold uppercase mb-3">THÔNG SỐ KỸ THUẬT</h2>
+              <h2 className="text-3xl font-black text-black uppercase mb-3">THÔNG SỐ KỸ THUẬT</h2>
               <div className="w-16 h-[2px] bg-[#c8102e] mx-auto"></div>
             </div>
             <div className="space-y-8">

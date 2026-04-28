@@ -5,31 +5,35 @@ import Image from "next/image";
 import Link from "next/link";
 import { Phone, Mail, MapPin, ChevronRight, Menu, Download, FileText, ArrowRight, User, MessageCircle } from "lucide-react";
 
+import { supabase } from "@/lib/supabase";
+
 export default function BrochurePage() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [brochures, setBrochures] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const { data } = await supabase
+          .from('brochures')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (data) setBrochures(data);
+      } catch (error) {
+        console.error("Lỗi fetch brochure:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  const brochures = [
-    { name: "VinFast VF 3", img: "/car/imgi_9_1.png", size: "2.4 MB" },
-    { name: "VinFast VF 5", img: "/car/imgi_10_3-2.png", size: "3.1 MB" },
-    { name: "VinFast VF 6", img: "/car/imgi_11_4.png", size: "4.5 MB" },
-    { name: "VinFast VF 7", img: "/car/imgi_12_5.png", size: "5.2 MB" },
-    { name: "VinFast VF 8", img: "/car/imgi_13_6.png", size: "6.8 MB" },
-    { name: "VinFast VF 9", img: "/car/imgi_14_7.png", size: "8.1 MB" },
-    { name: "VF Minio Green", img: "/car/imgi_15_Minio-green-mau-bac-540x282.png", size: "2.1 MB" },
-    { name: "VF Herio Green", img: "/car/imgi_16_Herio-Green-mau-vang-540x282.png", size: "2.5 MB" },
-    { name: "VF Nerio Green", img: "/car/imgi_17_Nerio-Green-mau-do-540x282-1.png", size: "2.8 MB" },
-    { name: "VF Limo Green", img: "/car/imgi_18_Limo-Green-mau-vang-540x282.png", size: "3.5 MB" },
-    { name: "VinFast EC Van", img: "/car/imgi_19_3-9-e1749183878376-2.jpg", size: "1.9 MB" },
-    { name: "VinFast Wild", img: "/news/imgi_20_vf-wild-ban-tai.png", size: "4.2 MB" },
-  ];
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
@@ -113,7 +117,7 @@ export default function BrochurePage() {
             <div key={index} className="bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden flex flex-col group border border-slate-100">
               <div className="relative h-56 bg-slate-50 flex items-center justify-center p-6 overflow-hidden">
                 <img 
-                  src={item.img} 
+                  src={item.image_url || "/logo/imgi_1_r3.png"} 
                   alt={item.name} 
                   className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700 drop-shadow-xl" 
                 />
@@ -126,11 +130,16 @@ export default function BrochurePage() {
               <div className="p-6 flex flex-col flex-1">
                 <h3 className="text-lg font-bold text-[#0F172A] mb-2 uppercase tracking-wide group-hover:text-[#E11D48] transition-colors">{item.name}</h3>
                 <div className="flex items-center gap-2 text-sm text-slate-500 mb-6">
-                  <FileText size={14} /> <span>PDF Document • {item.size}</span>
+                  <FileText size={14} /> <span>PDF Document • {item.file_size || 'N/A'}</span>
                 </div>
-                <button className="mt-auto w-full flex items-center justify-center gap-2 bg-[#0F172A] group-hover:bg-[#E11D48] text-white py-3.5 rounded-xl font-bold transition-all shadow-md active:scale-95">
+                <a 
+                  href={item.file_url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="mt-auto w-full flex items-center justify-center gap-2 bg-[#0F172A] group-hover:bg-[#E11D48] text-white py-3.5 rounded-xl font-bold transition-all shadow-md active:scale-95"
+                >
                   <Download size={18} /> Tải Brochure
-                </button>
+                </a>
               </div>
             </div>
           ))}

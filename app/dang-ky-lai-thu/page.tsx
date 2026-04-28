@@ -8,7 +8,7 @@ import { supabase } from "@/lib/supabase";
 
 export default function TestDriveRegistrationPage() {
   const [formData, setFormData] = useState({
-    carType: "VF 3",
+    carType: "",
     fullName: "",
     address: "",
     phone: "",
@@ -17,8 +17,18 @@ export default function TestDriveRegistrationPage() {
   });
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [carModels, setCarModels] = useState<any[]>([]);
 
   useEffect(() => {
+    const fetchCars = async () => {
+      const { data } = await supabase.from('cars').select('name').order('name');
+      if (data) {
+        setCarModels(data);
+        if (data.length > 0) setFormData(prev => ({ ...prev, carType: data[0].name }));
+      }
+    };
+    fetchCars();
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
@@ -135,12 +145,9 @@ export default function TestDriveRegistrationPage() {
                    value={formData.carType}
                    onChange={(e) => setFormData({...formData, carType: e.target.value})}
                  >
-                    <option value="VF 3">VF 3</option>
-                    <option value="VF 5">VF 5</option>
-                    <option value="VF 6">VF 6</option>
-                    <option value="VF 7">VF 7</option>
-                    <option value="VF 8">VF 8</option>
-                    <option value="VF 9">VF 9</option>
+                    {carModels.map((car, idx) => (
+                      <option key={idx} value={car.name}>{car.name}</option>
+                    ))}
                  </select>
                  <span className="text-[#c8102e] font-bold">*</span>
                </div>

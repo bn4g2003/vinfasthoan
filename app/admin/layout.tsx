@@ -12,6 +12,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Quản lý xe', href: '/admin/cars', icon: Car },
     { name: 'Quản lý bài viết', href: '/admin/posts', icon: FileText },
     { name: 'Quản lý liên hệ', href: '/admin/registrations', icon: Mail },
+    { name: 'Quản lý Brochure', href: '/admin/brochures', icon: FileText },
   ];
 
   return (
